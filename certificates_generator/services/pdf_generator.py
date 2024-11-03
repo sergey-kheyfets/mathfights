@@ -1,16 +1,16 @@
 import os
 from typing import Self
 import win32com.client
-from win32com.client import constants
 from ..datacontracts.datatypes import Leader, Gender, Team
 from ..services.abstractions import IPdfCertificateGenerator
+from ..utils.com_types import WordApp, WdReplace, WdFileFormat, WdSaveOptions
 from ..utils.str_utils import sanitize_string
 
 
 class PdfCertificateGenerator(IPdfCertificateGenerator):
 
     def __enter__(self) -> Self:
-        self._app = win32com.client.gencache.EnsureDispatch('Word.Application')
+        self._app: WordApp = win32com.client.gencache.EnsureDispatch('Word.Application')
         return self
 
     def __exit__(self, type, value, traceback) -> None:
@@ -30,32 +30,32 @@ class PdfCertificateGenerator(IPdfCertificateGenerator):
                 FindText="FIO",
                 Forward=True,
                 ReplaceWith=student.fio,
-                Replace=constants.wdReplaceAll
+                Replace=WdReplace.wdReplaceAll
             )
 
             doc.Content.Find.Execute(
                 FindText="CLASS",
                 Forward=True,
                 ReplaceWith=student.grade,
-                Replace=constants.wdReplaceAll
+                Replace=WdReplace.wdReplaceAll
             )
 
             doc.Content.Find.Execute(
                 FindText="CITY",
                 Forward=True,
                 ReplaceWith=team.city,
-                Replace=constants.wdReplaceAll
+                Replace=WdReplace.wdReplaceAll
             )
 
             doc.Content.Find.Execute(
                 FindText="SCHOOL",
                 Forward=True,
                 ReplaceWith=team.school,
-                Replace=constants.wdReplaceAll
+                Replace=WdReplace.wdReplaceAll
             )
 
-            doc.SaveAs(student_cert_path, FileFormat=constants.wdFormatPDF)
-            doc.Close(False)
+            doc.SaveAs(student_cert_path, FileFormat=WdFileFormat.wdFormatPDF)
+            doc.Close(WdSaveOptions.wdDoNotSaveChanges)
 
     def generate_appreciation_certificate(
             self,
@@ -69,7 +69,7 @@ class PdfCertificateGenerator(IPdfCertificateGenerator):
             FindText="FIO",
             Forward=True,
             ReplaceWith=leader.fio,
-            Replace=constants.wdReplaceAll
+            Replace=WdReplace.wdReplaceAll
         )
 
         honorific = 'Уважаемый' if leader.gender == Gender.male else 'Уважаемая'
@@ -77,8 +77,8 @@ class PdfCertificateGenerator(IPdfCertificateGenerator):
             FindText="GENDER",
             Forward=True,
             ReplaceWith=honorific,
-            Replace=constants.wdReplaceAll
+            Replace=WdReplace.wdReplaceAll
         )
 
-        doc.SaveAs(output_path, FileFormat=constants.wdFormatPDF)
-        doc.Close(False)
+        doc.SaveAs(output_path, FileFormat=WdFileFormat.wdFormatPDF)
+        doc.Close(WdSaveOptions.wdDoNotSaveChanges)
