@@ -43,16 +43,11 @@ class GameResult(Enum):
 class Game:
     def __init__(
             self,
-            index: int,
             team_1: Team = Team.unknown(),
             team_2: Team = Team.unknown()
         ) -> None:
-        self.index: int = index
         self.team_1: Team = team_1
         self.team_2: Team = team_2
-        self.game_1: Game | None = None
-        self.game_2: Game | None = None
-        self.game_next: Game | None = None
         self.referees: list[Person] = list()
         self.set_score(0, 0)
 
@@ -60,17 +55,13 @@ class Game:
         team_str_1, team_str_2 = '', ''
         if self.team_1 != Team.unknown():
             team_str_1 = self.team_1.team_name
-        elif self.game_1 is not None:
-            team_str_1 = f"Победитель матча №{self.game_1.index}"
         else:
             return 'Undefined game'
         if self.team_2 != Team.unknown():
             team_str_2 = self.team_2.team_name
-        elif self.game_2 is not None:
-            team_str_2 = f"Победитель матча №{self.game_2.index}"
         else:
             return 'Undefined game'
-        return f"{self.index}| {team_str_1} {self.score_1}:{self.score_2} {team_str_2}"
+        return f"{team_str_1} {self.score_1}:{self.score_2} {team_str_2}"
     
     def __repr__(self) -> str:
         return str(self)
@@ -106,39 +97,10 @@ class Game:
         if team_name == self.team_2.team_name:
             return points[1]
         return 0
-    
-    def update(self) -> None:
-        if self.game_1 is not None:
-            if self.game_1.result == GameResult.Win1:
-                self.team_1 = self.game_1.team_1
-            if self.game_1.result == GameResult.Win2:
-                self.team_1 = self.game_1.team_2
-        if self.game_2 is not None:
-            if self.game_2.result == GameResult.Win1:
-                self.team_2 = self.game_2.team_1
-            if self.game_2.result == GameResult.Win2:
-                self.team_2 = self.game_2.team_2
-    
-    def is_one_team_game(self) -> bool:
-        """
-        Вернёт True, если эта игра - слот для одной команды. 
-        Например, при игре в группе с нечётным кол-вом команд или неполной сеткой плэй-офф
-        """
-        return (self.team_1 != Team.unknown()) and (self.team_2 == Team.unknown()) and (self.game_2 is None)
-    
-    def match_team_and_game(self, team: Team, game: Game) -> None:
-        """
-        Создание игры для будущего раунда плэй-офф при одной известной команде
-        """
-        self.team_1 = team
-        self.game_2: Game = game
-        game.game_next = self
 
-    def match_games(self, game_1: Game, game_2: Game) -> None:
-        """
-        Создание игры для будущего раунда плэй-офф
-        """
-        self.game_1: Game = game_1
-        game_1.game_next = self
-        self.game_2: Game = game_2
-        game_2.game_next = self
+    def get_team_scores(self, team_name: str) -> int:
+        if team_name == self.team_1.team_name: 
+            return self.score_1
+        if team_name == self.team_2.team_name:
+            return self.score_2
+        return 0
