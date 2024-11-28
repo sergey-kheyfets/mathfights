@@ -1,0 +1,13 @@
+[project]
+name = "mathfights"
+version = "0.0.1"
+description = "Вспомогательное приложене для проведения математчиеских боев"
+readme = "README.md"
+requires-python = ">=3.11.3"
+
+[project.urls]
+Homepage = "https://github.com/sergey-kheyfets/mathfights"
+
+
+[tool.ruff.lint]
+select = ["ALL"]
