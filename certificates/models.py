@@ -21,25 +21,25 @@ class FullName:
     def from_string(cls, input_str: str) -> FullName:
         """Создает FullName на основе строки."""
         input_str = sanitize_string(input_str)
-        fio_parts = input_str.split(maxsplit=2)
+        full_name_parts = input_str.split(maxsplit=2)
 
-        if len(fio_parts) < 2:
+        if len(full_name_parts) < 2:
             msg = ("Передана строка некорректного формата!"
                    "Ожидалось: `Фамилия Имя [Отчество]`")
             raise ValueError(msg)
 
-        return cls(*fio_parts)
+        return cls(*full_name_parts)
 
     def __str__(self) -> str:
         """Возваращает ФИО в виде строки формата `Фамилия Имя Отчество`."""
-        fio_line = f"{self.last_name} {self.first_name}"
+        full_name_line = f"{self.last_name} {self.first_name}"
         if self.patronymic:
-            fio_line += " " + self.patronymic
-        return fio_line
+            full_name_line += " " + self.patronymic
+        return full_name_line
 
 @dataclass
 class Person:
-    fio: FullName
+    full_name: FullName
 
 @dataclass
 class Student(Person):

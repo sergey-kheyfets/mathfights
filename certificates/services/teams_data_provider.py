@@ -113,9 +113,9 @@ class ExcelTeamsDataProvider(TeamsDataProvider):
         leader_field = sheet.cells(row_idx, Columns.leader).value
 
         for leader_name in leader_field.split(","):
-            fio = FullName.from_string(leader_name)
-            gender = self._gender_guesser.guess_gender(fio)
-            leaders.append(Leader(fio=fio, gender=gender))
+            full_name = FullName.from_string(leader_name)
+            gender = self._gender_guesser.guess_gender(full_name)
+            leaders.append(Leader(full_name=full_name, gender=gender))
 
         return leaders
 
@@ -132,7 +132,7 @@ class ExcelTeamsDataProvider(TeamsDataProvider):
             student_name = sanitize_string(sheet.cells(row, Columns.student).value)
             if not student_name:
                 continue
-            student = Student(fio=FullName.from_string(student_name), grade=grade)
+            student = Student(full_name=FullName.from_string(student_name), grade=grade)
             team_members.append(student)
 
         return team_members

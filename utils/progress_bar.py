@@ -1,3 +1,4 @@
+#TODO(idris): Выпилить или переписать на нормальный вариант
 class ProgressBar:
 
     def __init__(self, length, max_value: int) -> None:

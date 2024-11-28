@@ -8,6 +8,8 @@ from .services.pdf_generator import CertificateGenerator
 from .services.teams_data_provider import ExcelTeamsDataProvider
 
 
+#TODO: Убрать вызовы print(), придумать другой способ отслеживания прогресса,
+# возможно в дальнейшем какой то общий объект-состояние для главного и фонового потока.
 class CertificateGeneratorApp:
     """Приложение-генератор сертификатов для участников и их преподавателей."""
 
@@ -44,7 +46,7 @@ class CertificateGeneratorApp:
             progress_bar = ProgressBar(20, len(teams))
 
             for team in teams:
-                leaders_str = " ".join([str(leader.fio) for leader in team.leaders])
+                leaders_str = " ".join([str(leader.full_name) for leader in team.leaders])
                 leader_path = certs_folder_path / leaders_str
                 if not Path.exists(leader_path):
                     Path.mkdir(leader_path)

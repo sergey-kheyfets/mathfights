@@ -1,5 +1,6 @@
 import pathlib
 from abc import ABC, abstractmethod
+from enum import StrEnum
 from os import PathLike
 from typing import Self
 
@@ -7,11 +8,20 @@ import win32com.client
 
 from certificates.models import Gender, Leader, Team
 from utils.com_types import (
+    Document,
     WdFileFormat,
     WdReplace,
     WdSaveOptions,
     WordApp,
 )
+
+
+class TextReplacements(StrEnum):
+    fio = "FIO"
+    grade = "GRADE"
+    city = "CITY"
+    school = "SCHOOL"
+    honorific = "HONORIFIC"
 
 
 class CertificateGenerator(ABC):
@@ -54,6 +64,7 @@ class CertificateGenerator(ABC):
         """
 
 
+# TODO(idris): Попытаться заменить на кроссплатформенное решение.
 class PdfCertificateGenerator(CertificateGenerator):
     """Генератор сертификатов в pdf-формате на основе файлов-шаблонов."""
 
@@ -74,9 +85,6 @@ class PdfCertificateGenerator(CertificateGenerator):
         self._appreciation_cert_template_path = appreciation_cert_template_path
 
     def __enter__(self) -> Self:
-        # TODO(idris): cross-platform - заменить на libreoffice
-        # или сделать выбор от платформы
-        # TODO(idris): Проверить, зависит ли от платформы (не отвалится ли на другой версии word-а)
         self._app: WordApp = win32com.client.gencache.EnsureDispatch("Word.Application")
         return self
 
@@ -97,36 +105,13 @@ class PdfCertificateGenerator(CertificateGenerator):
         Путь, по которому сохраняются сгенерированные сертификаты.
         """
         for student in team.members:
-            student_cert_path = pathlib.Path(output_directory) / str(student.fio)
+            student_cert_path = pathlib.Path(output_directory) / str(student.full_name)
             doc = self._app.Documents.Open(str(self._participation_cert_template_path))
 
-            doc.Content.Find.Execute(
-                FindText="FIO",
-                Forward=True,
-                ReplaceWith=str(student.fio),
-                Replace=WdReplace.wdReplaceAll,
-            )
-
-            doc.Content.Find.Execute(
-                FindText="CLASS",
-                Forward=True,
-                ReplaceWith=student.grade,
-                Replace=WdReplace.wdReplaceAll,
-            )
-
-            doc.Content.Find.Execute(
-                FindText="CITY",
-                Forward=True,
-                ReplaceWith=team.city,
-                Replace=WdReplace.wdReplaceAll,
-            )
-
-            doc.Content.Find.Execute(
-                FindText="SCHOOL",
-                Forward=True,
-                ReplaceWith=team.school,
-                Replace=WdReplace.wdReplaceAll,
-            )
+            self._replace_text(doc, TextReplacements.fio, str(student.full_name))
+            self._replace_text(doc, TextReplacements.grade, student.grade)
+            self._replace_text(doc, TextReplacements.city, team.city)
+            self._replace_text(doc, TextReplacements.school, team.school)
 
             doc.SaveAs(str(student_cert_path), FileFormat=WdFileFormat.wdFormatPDF)
             doc.Close(WdSaveOptions.wdDoNotSaveChanges)
@@ -146,23 +131,22 @@ class PdfCertificateGenerator(CertificateGenerator):
         """
         doc = self._app.Documents.Open(str(self._appreciation_cert_template_path))
 
-        doc.Content.Find.Execute(
-            FindText="FIO",
-            Forward=True,
-            ReplaceWith=str(leader.fio),
-            Replace=WdReplace.wdReplaceAll,
-        )
+        self._replace_text(doc, TextReplacements.fio, str(leader.full_name))
 
         honorific = "Уважаемый" if leader.gender == Gender.male else "Уважаемая"
-        doc.Content.Find.Execute(
-            FindText="GENDER",
-            Forward=True,
-            ReplaceWith=honorific,
-            Replace=WdReplace.wdReplaceAll,
-        )
+        self._replace_text(doc, TextReplacements.honorific, honorific)
 
         doc.SaveAs(
-            str(pathlib.Path(output_directory) / str(leader.fio)),
+            str(pathlib.Path(output_directory) / str(leader.full_name)),
             FileFormat=WdFileFormat.wdFormatPDF,
         )
         doc.Close(WdSaveOptions.wdDoNotSaveChanges)
+
+    @staticmethod
+    def _replace_text(doc: Document, text: str, replace_with: str) -> None:
+        doc.Content.Find.Execute(
+            FindText=f"{{{text}}}",
+            Forward=True,
+            ReplaceWith=replace_with,
+            Replace=WdReplace.wdReplaceAll,
+        )
