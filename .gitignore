@@ -1,4 +1,4 @@
-certificates_generator/test_data
+certificates/test_data
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -141,7 +141,6 @@ venv.bak/
 
 # mkdocs documentation
 /site
-
 # mypy
 .mypy_cache/
 .dmypy.json

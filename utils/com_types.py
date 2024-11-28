@@ -1,5 +1,5 @@
 from enum import IntEnum
-from typing import Callable, Literal, Protocol
+from typing import Callable, Protocol
 
 class Cell(Protocol):
     Value: str
